@@ -1,0 +1,36 @@
+#!/bin/sh
+
+export HOME=/home
+export PATH=/bin:/sbin:/python/bin
+export PYTHONHOME=/python
+
+mountpoint -q proc || mount -t proc proc proc
+mountpoint -q sys || mount -t sysfs sys sys
+if ! mountpoint -q dev
+then
+  mount -t devtmpfs dev dev || mdev -s
+  mkdir -p dev/pts
+  mountpoint -q dev/pts || mount -t devpts dev/pts dev/pts
+fi
+
+if [ $$ -eq 1 ]
+then
+  # Don't allow deferred initialization to crap messages over the shell prompt
+  echo 3 3 > /proc/sys/kernel/printk
+
+  # Setup networking for QEMU (needs /proc)
+  ifconfig eth0 10.0.2.15
+  route add default gw 10.0.2.2
+  [ "$(date +%s)" -lt 1000 ] && rdate 10.0.2.2 # or time-b.nist.gov
+  [ "$(date +%s)" -lt 10000000 ] && ntpd -nq -p north-america.pool.ntp.org
+
+  [ -z "$CONSOLE" ] &&
+    CONSOLE="$(sed -rn 's@(.* |^)console=(/dev/)*([[:alnum:]]*).*@\3@p' /proc/cmdline)"
+
+  [ -z "$HANDOFF" ] && HANDOFF=./python/bin/python
+  [ -z "$CONSOLE" ] && CONSOLE=console
+  exec /sbin/oneit -c /dev/"$CONSOLE" $HANDOFF
+else
+  /bin/sh
+  umount /dev/pts /dev /sys /proc
+fi
