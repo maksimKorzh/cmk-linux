@@ -1,11 +1,11 @@
 CMK Linux
 Welcome to my custom TinyCoreLinux build
 
-About
+# About
 CMK linux is my "barn" to work on the hobby projects and<br>
 record programming tutorials for YouTube.
 
-Features
+# Features
 - Xorg 7.7
 - alsa/pulseaudio/pavucontrol
 - mplayer-cli
