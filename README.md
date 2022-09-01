@@ -1,4 +1,4 @@
-CMK Linux
+# CMK Linux
 Welcome to my custom TinyCoreLinux build
 
 # About
